@@ -1,0 +1,72 @@
+.addPackage {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: calc(100vh - 50px);
+    background-color: #f6f5f7;
+    padding: 20px;
+    margin-left: 250px; /* Adding space for the left sidebar */
+    box-sizing: border-box;
+    overflow-y: auto;
+    width: calc(100% - 250px); /* Occupy remaining width */
+}
+
+.addPackageContainer {
+    width: 100%;
+    height: calc(100% - 50px);
+    border-radius: 5px;
+    padding: 15px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+    background-color: #fff;
+    display: flex;
+}
+
+.packageNameText {
+    margin: 20px 20px 20px 10px;
+    font-size: 1.5em;
+    padding: 10px;
+    max-width: 50%;
+}
+
+.packageNameInputArea {
+    margin: 20px 20px 20px 10px;
+    font-size: 1.2em;
+    padding: 10px;
+    width: calc(100% - 300px); /* Adjusted to occupy more width */
+}
+
+.addPackageLeft {
+    flex: 7;
+}
+
+.addPackageRight {
+    flex: 3;
+    position: relative; /* Make this the reference point for absolute positioning */
+}
+
+.backBtn {
+    position: absolute;
+    top: 20px; /* Distance from the top */
+    right: 20px; /* Distance from the right */
+    padding: 20px 30px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+.saveBtn {
+    position: absolute;
+    bottom: 20px; /* Distance from the bottom */
+    right: 20px; /* Distance from the right */
+    padding: 20px 30px;
+    background-color: #4caf50;
+    color: white;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

@@ -1,0 +1,18 @@
+.topbarContainer {
+    height: 50px;
+    width: 100%;
+    background-color: orange;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.logo {
+    font-size: 24px;
+    margin-left: 20px;
+    font-weight: bold;
+    color: whitesmoke;
+    cursor: pointer;
+}

@@ -1,0 +1,117 @@
+.flgs {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: calc(100vh - 50px);
+    background-color: #f6f5f7;
+    padding: 20px;
+    margin-left: 250px; /* Adding space for the left sidebar */
+    box-sizing: border-box;
+    overflow-y: auto;
+    width: calc(100% - 250px); /* Occupy remaining width */
+}
+
+.flgsWrapper {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.form-select {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-select:hover,
+.form-select:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 8px rgba(0, 91, 187, 0.2);
+}
+
+.flgsTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.flagListing {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.addFlagBtn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    max-width: 200px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.addFlagBtn:hover {
+    background-color: #0056b3;
+}
+
+.flgsBottom {
+    display: flex;
+    flex-direction: column;
+}
+
+.flgsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.flagListItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+}
+
+.flagListItem:hover {
+    background-color: #f0f0f0;
+}
+
+.flagListItemLeft {
+    display: flex;
+    align-items: center;
+}
+
+.flagName {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.flagListItemRight {
+    display: flex;
+    gap: 15px;
+}
+
+.flagListItemRight .MuiSvgIcon-root {
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.flagListItemRight .MuiSvgIcon-root:hover {
+    transform: scale(1.2);
+}
