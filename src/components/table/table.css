@@ -1,0 +1,42 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableContainer {
+    border: 1px solid #ddd;
+    padding: 0;
+}
+
+.tableList {
+    list-style-type: none;  /* Remove bullet points */
+    padding: 0;
+    margin: 0;
+}
+
+.tableListItem {
+    display: flex;
+    justify-content: space-between; /* Ensure items are spaced evenly */
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #ddd; /* Line between rows */
+}
+
+.tableListItem > div {
+    flex: 1; /* Ensure equal width for each item */
+    text-align: center; /* Center the content */
+    border-right: 1px solid #ddd; /* Line between columns */
+}
+
+.tableListItem > div:last-child {
+    border-right: none; /* Remove border from the last item */
+}
+
+.tableListItem input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* Optional: Add hover effect */
+.tableListItem:hover {
+    background-color: #f1f1f1;
+}

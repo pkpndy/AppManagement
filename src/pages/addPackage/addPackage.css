@@ -37,11 +37,11 @@
 }
 
 .addPackageLeft {
-    flex: 7;
+    flex: 8;
 }
 
 .addPackageRight {
-    flex: 3;
+    flex: 2;
     position: relative; /* Make this the reference point for absolute positioning */
 }
 

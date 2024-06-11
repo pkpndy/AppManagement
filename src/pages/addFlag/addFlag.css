@@ -36,6 +36,10 @@
     width: calc(100% - 300px); /* Adjusted to occupy more width */
 }
 
+.multiSelectDropdown {
+    margin-top: 20px;
+}
+
 .addFlagLeft {
     flex: 7;
 }

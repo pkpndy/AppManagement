@@ -1,6 +1,6 @@
 import "./leftSidebar.css";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -11,10 +11,16 @@ import FlagCircleIcon from "@mui/icons-material/FlagCircle";
 export default function Leftbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleDropdownToggle = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
+
+    const handleFlagPageClick = (path) => {
+        if(location.state != null)  location.state = null;
+        handleNavigation(path);
+    }
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -59,7 +65,7 @@ export default function Leftbar() {
                         </li> */}
                         <li
                             className="leftbarListItem"
-                            onClick={() => handleNavigation("/dashboard/flags")}
+                            onClick={() => handleFlagPageClick("/dashboard/flags")}
                         >
                             <FlagIcon className="leftbarIcon" />
                             <span className="leftbarListIemText">Flag</span>

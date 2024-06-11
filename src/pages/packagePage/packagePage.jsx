@@ -11,23 +11,13 @@ export default function PackagePage() {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [pkgName, setPkgName] = useState("");
-    const [showInput, setShowInput] = useState(false);
     const [editingPackageIndex, setEditingPackageIndex] = useState(null);
     const [newPkgName, setNewPkgName] = useState("");
 
     const navigate = useNavigate();
 
-    const handleAddPkgCancel = () => {
-        setShowInput(false);
-        setPkgName(""); // Reset package name on cancel
-    };
-
-    const handleAddPackage = () => {
-        setShowInput(true);
-    };
-
-    const handlePkgNameChange = (e) => {
-        setPkgName(e.target.value);
+    const addPackageBtnClick = () => {
+        navigate("/dashboard/add-package")
     };
 
     const handleNewPkgNameChange = (e) => {
@@ -78,27 +68,6 @@ export default function PackagePage() {
         }
     };
 
-    const handlePkgNameSubmit = async () => {
-        if (pkgName.trim() === "") {
-            setError("Package name cannot be empty");
-            return;
-        }
-
-        const newPackage = { packageName: pkgName };
-        try {
-            await axios.post(
-                "http://localhost:22000/api/admin/package/create",
-                newPackage
-            );
-            setPackages([...packages, newPackage]);
-            setPkgName("");
-            setShowInput(false);
-            setError(null);
-        } catch (error) {
-            setError("An error occurred while adding the package.");
-        }
-    };
-
     useEffect(() => {
         async function fetchPackages() {
             try {
@@ -129,32 +98,11 @@ export default function PackagePage() {
                         <span className="packageListing">
                             No packages available
                         </span>
-                        {showInput ? (
-                            <div className="inputDropdown">
-                                <input
-                                    type="text"
-                                    value={pkgName}
-                                    onChange={handlePkgNameChange}
-                                    placeholder="Enter package name..."
-                                />
-                                <button
-                                    onClick={handlePkgNameSubmit}
-                                    className="submitBtn">
-                                    Submit
-                                </button>
-                                <button
-                                    onClick={handleAddPkgCancel}
-                                    className="cancelBtn">
-                                    Cancel
-                                </button>
-                            </div>
-                        ) : (
-                            <button
-                                className="addPackageBtn"
-                                onClick={handleAddPackage}>
-                                Add Package
-                            </button>
-                        )}
+                        <button
+                            className="addPackageBtn"
+                            onClick={addPackageBtnClick}>
+                            Add Package
+                        </button>
                     </div>
                 </div>
             ) : packages.length === 0 && error != null ? (
@@ -165,35 +113,18 @@ export default function PackagePage() {
                 <div className="pkgsWrapper">
                     <div className="pkgsTop">
                         <span className="packageListing">Package Listing</span>
-                        {showInput ? (
-                            <div className="inputDropdown">
-                                <input
-                                    type="text"
-                                    value={pkgName}
-                                    onChange={handlePkgNameChange}
-                                    placeholder="Enter package name..."
-                                />
-                                <button
-                                    onClick={handlePkgNameSubmit}
-                                    className="submitBtn">
-                                    Submit
-                                </button>
-                                <button
-                                    onClick={handleAddPkgCancel}
-                                    className="cancelBtn">
-                                    Cancel
-                                </button>
-                            </div>
-                        ) : (
-                            <button
-                                className="addPackageBtn"
-                                onClick={handleAddPackage}>
-                                Add Package
-                            </button>
-                        )}
+                        <button
+                            className="addPackageBtn"
+                            onClick={addPackageBtnClick}>
+                            Add Package
+                        </button>
                     </div>
                     <div className="pkgsBottom">
                         <ul className="pkgsList">
+                            <li className="packageListItem">
+                                <div className="packageName" >Package Name</div>
+                                <div className="packageName">Actions</div>
+                            </li>
                             {packages.map((pkg, index) => (
                                 <li className="packageListItem" key={index}>
                                     <div className="packageListItemLeft">

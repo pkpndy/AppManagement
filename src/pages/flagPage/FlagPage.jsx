@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import AlertPopUp from '../../components/alertPopUp/AlertPopUp';
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -12,6 +13,7 @@ export default function FlagPage() {
     const [error, setError] = useState(null);
     const [pkgSelected, setPkgSelected] = useState("");
     const [packages, setPackages] = useState([]);
+    const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, flag: null, index: null });
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -36,6 +38,7 @@ export default function FlagPage() {
             setPkgSelected(packageName);
             fetchFlags(packageName);
         } else {
+            setPkgSelected("");
             fetchFlags();
         }
     }, [packageName]);
@@ -56,7 +59,8 @@ export default function FlagPage() {
                 res = await axios.get(
                     "http://localhost:22000/api/admin/flags/list"
                 );
-                setFlags(res.data.results);
+                let flagsToShow = res.data.results.filter((flg) => flg.flagVisibility !== 1);
+                setFlags(flagsToShow);
             }
             setError(null);
         } catch (err) {
@@ -67,7 +71,43 @@ export default function FlagPage() {
         }
     };
 
-    const handleChange = (event) => {
+    const handleFlgDelete = (flg, index) => {
+        setDeleteConfirmation({ show: true, flag: flg, index: index });
+    };
+
+    const handleConfirmDelete = async () => {
+        const { flag, index } = deleteConfirmation;
+        try {
+            if (flag.flagVisibility === 1 || (flag.flagVisibility === 0 && pkgSelected === "")) {
+                await axios.delete(
+                    "http://localhost:22000/api/admin/flags/delete",
+                    {
+                        data: { flagName: flag.flagName },
+                    }
+                );
+                setFlags((prevItems) => prevItems.filter((_, i) => i !== index));
+            } else if (pkgSelected !== "") {
+                const pkgId = packages.find((pkg) => pkg.packageName === pkgSelected)._id;
+                const packageUpdate = {
+                    packageId: pkgId,
+                    removeFlags: [flag._id]
+                };
+                await axios.patch("http://localhost:22000/api/admin/package/update", packageUpdate);
+                setFlags((prevItems) => prevItems.filter((_, i) => i !== index));
+            }
+            setError(null);
+        } catch (err) {
+            setError("Error occurred while deleting the flag.");
+        } finally {
+            setDeleteConfirmation({ show: false, flag: null, index: null });
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteConfirmation({ show: false, flag: null, index: null });
+    };
+
+    const handlePkgSelectionChange = (event) => {
         const selectedPackage = event.target.value;
         setPkgSelected(selectedPackage);
         if (selectedPackage) {
@@ -92,7 +132,7 @@ export default function FlagPage() {
                             id="package"
                             className="form-select"
                             value={pkgSelected}
-                            onChange={handleChange}>
+                            onChange={handlePkgSelectionChange}>
                             <option value="">Choose Package...</option>
                             {packages.map((pkg) => (
                                 <option key={pkg._id} value={pkg.packageName}>
@@ -101,7 +141,13 @@ export default function FlagPage() {
                             ))}
                         </select>
                         <button
-                            onClick={() => navigate("/dashboard/addFlag")}
+                            onClick={() => navigate("/dashboard/addFlag",
+                                {
+                                    state: {
+                                        packageName: pkgSelected,
+                                    },
+                                }
+                            )}
                             className="addFlagBtn">
                             Add Flag
                         </button>
@@ -120,7 +166,7 @@ export default function FlagPage() {
                             id="package"
                             className="form-select"
                             value={pkgSelected}
-                            onChange={handleChange}>
+                            onChange={handlePkgSelectionChange}>
                             <option value="">Choose Package...</option>
                             {packages.map((pkg) => (
                                 <option key={pkg._id} value={pkg.packageName}>
@@ -142,6 +188,11 @@ export default function FlagPage() {
                     </div>
                     <div className="pkgsBottom">
                         <ul className="pkgsList">
+                            <li className="flagListItem">
+                                <div className="flagName">Flag Name</div>
+                                <div className="flagName">Packages Associated</div>
+                                <div className="flagName">Actions</div>
+                            </li>
                             {flags.map((flg, index) => (
                                 <li key={index} className="flagListItem">
                                     <div className="flagListItemLeft">
@@ -155,7 +206,10 @@ export default function FlagPage() {
                                     </div>
                                     <div className="flagListItemRight">
                                         <EditIcon htmlColor="DodgerBlue" />
-                                        <DeleteForeverIcon htmlColor="FireBrick" />
+                                        <DeleteForeverIcon 
+                                            onClick={() => handleFlgDelete(flg, index)} 
+                                            htmlColor="FireBrick" 
+                                        />
                                         <VisibilityIcon htmlColor="ForestGreen" />
                                     </div>
                                 </li>
@@ -164,6 +218,13 @@ export default function FlagPage() {
                     </div>
                 </div>
             )}
+            {deleteConfirmation.show && 
+                <AlertPopUp 
+                    popupText="Are you sure you want to delete this item?" 
+                    onConfirm={handleConfirmDelete} 
+                    onCancel={handleCancelDelete} 
+                />
+            }
         </div>
     );
 }

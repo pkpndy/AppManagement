@@ -15,7 +15,7 @@ function Dashboard() {
                 <Leftbar />
                 <Routes>
                     <Route path="packages" element={<PackagePage />} />
-                    {/* <Route path="add-package" element={<AddPackage />} /> */}
+                    <Route path="add-package" element={<AddPackage />} />
                     <Route path="flags" element={<FlagPage />} />
                     <Route path="addFlag" element={<AddFlag />} />
                 </Routes>
