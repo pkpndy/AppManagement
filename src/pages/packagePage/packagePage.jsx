@@ -5,6 +5,7 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import TourIcon from "@mui/icons-material/Tour";
 import "./packagePage.css";
+import ErrorPopUp from "../../components/errorPopUp/ErrorPopUp";
 
 export default function PackagePage() {
     const [packages, setPackages] = useState([]);
@@ -39,6 +40,11 @@ export default function PackagePage() {
                 }
             );
 
+            if (res.data.isError) {
+                setError(res.data.message);
+                return;
+            }
+
             // Update the package name locally if the update is successful
             const updatedPackages = packages.map((p, i) =>
                 i === index ? { ...p, packageName: newPkgName } : p
@@ -55,12 +61,18 @@ export default function PackagePage() {
 
     const handlePkgDelete = async (pkg, index) => {
         try {
-            await axios.delete(
+            const res = await axios.delete(
                 "http://localhost:22000/api/admin/package/delete",
                 {
                     data: { packageName: pkg.packageName },
                 }
             );
+
+            if (res.data.isError) {
+                setError(res.data.message);
+                return;
+            }
+
             setPackages((prevItems) => prevItems.filter((_, i) => i !== index));
             setError(null);
         } catch (err) {
@@ -75,8 +87,14 @@ export default function PackagePage() {
                 const response = await axios.get(
                     "http://localhost:22000/api/admin/package/list"
                 );
-                setPackages(response.data.results);
-                setError(null);
+
+                if (response.data.isError) {
+                    setError(response.data.message);
+                    setPackages([]);
+                } else {
+                    setPackages(response.data.results);
+                    setError(null);
+                }
             } catch (err) {
                 setError("An error occurred while fetching packages.");
             } finally {
@@ -92,7 +110,8 @@ export default function PackagePage() {
 
     return (
         <div className="pkgs">
-            {packages.length === 0 && error === null ? (
+            {error && <ErrorPopUp errorMsg={error} />}
+            {packages.length === 0 && !error ? (
                 <div className="pkgsWrapper">
                     <div className="pkgsTop">
                         <span className="packageListing">
@@ -104,10 +123,6 @@ export default function PackagePage() {
                             Add Package
                         </button>
                     </div>
-                </div>
-            ) : packages.length === 0 && error != null ? (
-                <div className="pkgsWrapper">
-                    <div>{error}</div>
                 </div>
             ) : (
                 <div className="pkgsWrapper">
@@ -122,7 +137,7 @@ export default function PackagePage() {
                     <div className="pkgsBottom">
                         <ul className="pkgsList">
                             <li className="packageListItem">
-                                <div className="packageName" >Package Name</div>
+                                <div className="packageName">Package Name</div>
                                 <div className="packageName">Actions</div>
                             </li>
                             {packages.map((pkg, index) => (
@@ -133,27 +148,16 @@ export default function PackagePage() {
                                                 <input
                                                     type="text"
                                                     value={newPkgName}
-                                                    onChange={
-                                                        handleNewPkgNameChange
-                                                    }
+                                                    onChange={handleNewPkgNameChange}
                                                     placeholder="Enter new package name..."
                                                 />
                                                 <button
-                                                    onClick={() =>
-                                                        handlePkgUpdate(
-                                                            pkg,
-                                                            index
-                                                        )
-                                                    }
+                                                    onClick={() => handlePkgUpdate(pkg, index)}
                                                     className="editPackageBtns">
                                                     Submit
                                                 </button>
                                                 <button
-                                                    onClick={() =>
-                                                        setEditingPackageIndex(
-                                                            null
-                                                        )
-                                                    }
+                                                    onClick={() => setEditingPackageIndex(null)}
                                                     className="editPackageBtns">
                                                     Cancel
                                                 </button>
@@ -166,15 +170,11 @@ export default function PackagePage() {
                                     </div>
                                     <div className="packageListItemRight">
                                         <EditIcon
-                                            onClick={() =>
-                                                setEditingPackageIndex(index)
-                                            }
+                                            onClick={() => setEditingPackageIndex(index)}
                                             htmlColor="DodgerBlue"
                                         />
                                         <DeleteForeverIcon
-                                            onClick={() =>
-                                                handlePkgDelete(pkg, index)
-                                            }
+                                            onClick={() => handlePkgDelete(pkg, index)}
                                             htmlColor="FireBrick"
                                         />
                                         <TourIcon
@@ -182,8 +182,7 @@ export default function PackagePage() {
                                             onClick={() =>
                                                 navigate("/dashboard/flags", {
                                                     state: {
-                                                        packageName:
-                                                            pkg.packageName,
+                                                        packageName: pkg.packageName,
                                                     },
                                                 })
                                             }

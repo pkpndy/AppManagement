@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MultiSelectDropdown from "../../components/multiSelectDropdown/MultiSelectDropdown";
+import AlertPopUp from "../../components/alertPopUp/AlertPopUp";
+import ErrorPopUp from "../../components/errorPopUp/ErrorPopUp";
 import "./addFlag.css";
 import axios from "axios";
 
@@ -14,12 +16,17 @@ export default function AddFlag() {
     const [flgSummary, setFlgSummary] = useState("");
     const [flgValue, setFlgValue] = useState("");
     const [error, setError] = useState(null);
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     useEffect(() => {
         async function fetchPackages() {
             try {
                 const response = await axios.get("http://localhost:22000/api/admin/package/list");
-                setPackages(response.data.results);
+                if (response.data.isError) {
+                    setError(response.data.message);
+                } else {
+                    setPackages(response.data.results);
+                }
             } catch (err) {
                 setError("An error occurred while fetching packages.");
             }
@@ -44,12 +51,15 @@ export default function AddFlag() {
         navigate("/dashboard/flags");
     }
 
-    const handleSaveBtnClick = async () => {
+    const handleSaveBtnClick = () => {
         if (!flgName.trim() || !flgSummary.trim() || !flgValue.trim()) {
             setError("Flag name, flag summary, or flag value cannot be empty!");
             return;
         }
+        setShowConfirmation(true);
+    };
 
+    const handleConfirmSave = async () => {
         let vt = document.getElementById('visibilityType').textContent.toLowerCase();
 
         const selectedPackageIds = selectedOptions.map(option => {
@@ -64,19 +74,28 @@ export default function AddFlag() {
             flagVisibility: vt === "public" ? 0 : 1,
             packagesAssociated: selectedPackageIds
         };
-        console.log("newFlag");
-        console.log(newFlag);
 
         try {
-            await axios.post("http://localhost:22000/api/admin/flags/create", newFlag);
-            setFlgName("");
-            setFlgSummary("");
-            setFlgValue("");
-            setSelectedOptions([]);
-            setError(null);
+            const response = await axios.post("http://localhost:22000/api/admin/flags/create", newFlag);
+            if (response.data.isError) {
+                setError(response.data.message);
+            } else {
+                setFlgName("");
+                setFlgSummary("");
+                setFlgValue("");
+                setSelectedOptions([]);
+                setError(null);
+                navigate("/dashboard/flags");
+            }
         } catch (err) {
             setError("Error occurred while adding flag.");
+        } finally {
+            setShowConfirmation(false);
         }
+    };
+
+    const handleCancelSave = () => {
+        setShowConfirmation(false);
     };
 
     return (
@@ -117,24 +136,31 @@ export default function AddFlag() {
                         </div>
                     ) : (
                         <div>
-                        <span className="flagFieldName">Visibility Type :</span>
-                        <span className="flagFieldName" id="visibilityType">Public</span>
-                        <MultiSelectDropdown
-                            headerText={"Add associated packages..."}
-                            selectedOptions={selectedOptions}
-                            packages={packages}
-                            handleCheckboxChange={handleCheckboxChange}
-                            className="multiSelectDropdown"
-                        />
+                            <span className="flagFieldName">Visibility Type :</span>
+                            <span className="flagFieldName" id="visibilityType">Public</span>
+                            <MultiSelectDropdown
+                                headerText={"Add associated packages..."}
+                                selectedOptions={selectedOptions}
+                                packages={packages}
+                                handleCheckboxChange={handleCheckboxChange}
+                                className="multiSelectDropdown"
+                            />
                         </div>
                     )}
                 </div>
                 <div className="addPackageRight">
                     <button onClick={handleBackBtnClick} className="backBtn">Back</button>
                     <button onClick={handleSaveBtnClick} className="saveBtn">Save</button>
-                    {error && <div className="error">{error}</div>}
+                    {error && <ErrorPopUp errorMsg={error} />}
                 </div>
             </div>
+            {showConfirmation && 
+                <AlertPopUp 
+                    popupText="Are you sure you want to save this flag?" 
+                    onConfirm={handleConfirmSave} 
+                    onCancel={handleCancelSave} 
+                />
+            }
         </div>
     );
 }

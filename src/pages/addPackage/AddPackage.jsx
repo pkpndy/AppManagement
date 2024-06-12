@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ErrorPopUp from "../../components/errorPopUp/ErrorPopUp";
 import axios from "axios";
-import MultiSelectDropdown from "../../components/multiSelectDropdown/MultiSelectDropdown";
 import Table from "../../components/table/Table";
 import "./addPackage.css";
 
@@ -23,7 +23,7 @@ export default function AddPackage() {
 
     const handlePackageNameInput = (e) => {
         setPkgName(e.target.value);
-    }
+    };
 
     useEffect(() => {
         async function fetchFlags() {
@@ -33,6 +33,7 @@ export default function AddPackage() {
                 setFlags(flagsToShow);
             } catch (err) {
                 setError("Error occurred while fetching flags.");
+                console.log(err);
             }
         }
         fetchFlags();
@@ -40,11 +41,11 @@ export default function AddPackage() {
 
     const handleBackBtnClick = () => {
         navigate("/dashboard/packages");
-    }
+    };
 
     const handleSaveBtnClick = async () => {
-        if(pkgName == "") {
-            setError("package name can not be empty!");
+        if (pkgName === "") {
+            setError("Package name cannot be empty!");
             return;
         }
 
@@ -59,17 +60,28 @@ export default function AddPackage() {
         };
 
         try {
-            await axios.post("http://localhost:22000/api/admin/package/create", newPackage);
-            setPkgName("");
-            setSelectedFlags([]);
+            const res = await axios.post("http://localhost:22000/api/admin/package/create", newPackage);
+            if (res.data.isError) {
+                setError(res.data.message);
+                console.log(res.data.message);
+            } else {
+                setPkgName("");
+                setSelectedFlags([]);
+            }
         } catch (err) {
-            setError("Error occured while adding package.");
+            if (err.response) {
+                setError(err.response.data.message);
+                console.log(err.response.data.message);
+            } else {
+                setError("An error occurred while adding the package.");
+                console.log(err);
+            }
         }
     };
 
-
     return (
         <div className="addPackage">
+            {error && <ErrorPopUp errorMsg={error} />}
             <div className="addPackageContainer">
                 <div className="addPackageLeft">
                     <span className="packageNameText">Package Name :</span>
@@ -81,10 +93,6 @@ export default function AddPackage() {
                         className="packageNameInputArea"
                     />
                     <div className="packageNameText">Choose Public Flags not to add :</div>
-                    {/* <MultiSelectDropdown
-                        headerText={"Add associated flags..."}
-                        className="multiSelectDropdown"
-                    /> */}
                     <Table 
                         selectedFlags={selectedFlags}
                         setSelectedFlags={setSelectedFlags} 

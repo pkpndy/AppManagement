@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import AlertPopUp from '../../components/alertPopUp/AlertPopUp';
+import AlertPopUp from "../../components/alertPopUp/AlertPopUp";
+import ErrorPopUp from "../../components/errorPopUp/ErrorPopUp";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -25,7 +26,11 @@ export default function FlagPage() {
                 const response = await axios.get(
                     "http://localhost:22000/api/admin/package/list"
                 );
-                setPackages(response.data.results);
+                if (response.data.isError) {
+                    setError(response.data.message);
+                } else {
+                    setPackages(response.data.results);
+                }
             } catch (err) {
                 setError("An error occurred while fetching packages.");
             }
@@ -44,9 +49,9 @@ export default function FlagPage() {
     }, [packageName]);
 
     const fetchFlags = async (pkgName = "") => {
+        let res;
         try {
             setLoading(true);
-            let res;
             if (pkgName) {
                 res = await axios.post(
                     `http://localhost:22000/api/admin/package/listOne`,
@@ -54,18 +59,28 @@ export default function FlagPage() {
                         packageName: pkgName,
                     }
                 );
-                setFlags(res.data.results.flagsAssociated);
+                if (res.data.isError) {
+                    setError(res.data.message);
+                    setFlags([]);
+                } else {
+                    setFlags(res.data.results.flagsAssociated);
+                }
             } else {
                 res = await axios.get(
                     "http://localhost:22000/api/admin/flags/list"
                 );
-                let flagsToShow = res.data.results.filter((flg) => flg.flagVisibility !== 1);
-                setFlags(flagsToShow);
+                if (res.data.isError) {
+                    setError(res.data.message);
+                    setFlags([]);
+                } else {
+                    let flagsToShow = res.data.results.filter((flg) => flg.flagVisibility !== 1);
+                    setFlags(flagsToShow);
+                }
             }
             setError(null);
         } catch (err) {
-            setFlags([]);
             setError("An error occurred while fetching flags.");
+            setFlags([]);
         } finally {
             setLoading(false);
         }
@@ -123,7 +138,8 @@ export default function FlagPage() {
 
     return (
         <div className="flgs">
-            {flags.length === 0 && error === null ? (
+            {error && <ErrorPopUp errorMsg={error} />}
+            {flags.length === 0 && !error ? (
                 <div className="flgsWrapper">
                     <div className="flgsTop">
                         <span className="flagListing">No flags available</span>
@@ -141,13 +157,13 @@ export default function FlagPage() {
                             ))}
                         </select>
                         <button
-                            onClick={() => navigate("/dashboard/addFlag",
-                                {
+                            onClick={() =>
+                                navigate("/dashboard/addFlag", {
                                     state: {
                                         packageName: pkgSelected,
                                     },
-                                }
-                            )}
+                                })
+                            }
                             className="addFlagBtn">
                             Add Flag
                         </button>
@@ -206,9 +222,9 @@ export default function FlagPage() {
                                     </div>
                                     <div className="flagListItemRight">
                                         <EditIcon htmlColor="DodgerBlue" />
-                                        <DeleteForeverIcon 
-                                            onClick={() => handleFlgDelete(flg, index)} 
-                                            htmlColor="FireBrick" 
+                                        <DeleteForeverIcon
+                                            onClick={() => handleFlgDelete(flg, index)}
+                                            htmlColor="FireBrick"
                                         />
                                         <VisibilityIcon htmlColor="ForestGreen" />
                                     </div>

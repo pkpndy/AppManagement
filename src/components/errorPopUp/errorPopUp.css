@@ -1,0 +1,40 @@
+.errorContainer {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #C70039;
+    color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 10px;
+    max-width: 80%;
+    box-sizing: border-box;
+}
+
+.errorItemsContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.errorTop {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.closeIcon {
+    cursor: pointer;
+    color: white;
+}
+
+.errorBottom {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.errorText {
+    text-align: center;
+    flex-grow: 1;
+}
