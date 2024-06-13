@@ -137,8 +137,8 @@ export default function PackagePage() {
                     <div className="pkgsBottom">
                         <ul className="pkgsList">
                             <li className="packageListItem">
-                                <div className="packageName">Package Name</div>
-                                <div className="packageName">Actions</div>
+                                <div className="packageListingActionTab">Package Name</div>
+                                <div className="packageListingActionTab ">Actions</div>
                             </li>
                             {packages.map((pkg, index) => (
                                 <li className="packageListItem" key={index}>

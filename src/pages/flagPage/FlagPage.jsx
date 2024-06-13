@@ -202,23 +202,24 @@ export default function FlagPage() {
                             Add Flag
                         </button>
                     </div>
-                    <div className="pkgsBottom">
-                        <ul className="pkgsList">
+                    <div className="flgsBottom">
+                        <ul className="flgsList">
                             <li className="flagListItem">
-                                <div className="flagName">Flag Name</div>
-                                <div className="flagName">Packages Associated</div>
-                                <div className="flagName">Actions</div>
+                                <div className="flagListingActionTab">Flag Name</div>
+                                <div className="flagListingActionTab">Visibility</div>
+                                <div className="flagListingActionTab">Packages Associated</div>
+                                <div className="flagListingActionTab">Actions</div>
                             </li>
                             {flags.map((flg, index) => (
                                 <li key={index} className="flagListItem">
-                                    <div className="flagListItemLeft">
-                                        <span className="flagName">
-                                            {flg.flagName}
-                                        </span>
+                                    <div className="flagName">
+                                        {flg.flagName}
                                     </div>
-                                    <div className="flagListItemCenter">
-                                        Total Packages Associated:{" "}
-                                        {flg.packagesAssociated.length}
+                                    <div className="flagVisibility">
+                                        {flg.flagVisibility === 0 ? "Public" : "Private"}
+                                    </div>
+                                    <div>
+                                        Total Packages Associated: {flg.packagesAssociated.length}
                                     </div>
                                     <div className="flagListItemRight">
                                         <EditIcon htmlColor="DodgerBlue" />
