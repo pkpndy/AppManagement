@@ -16,6 +16,12 @@ export default function FlagPage() {
     const [packages, setPackages] = useState([]);
     const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, flag: null, index: null });
 
+    const [editIndex, setEditIndex] = useState(null);
+    const [newFlagName, setNewFlagName] = useState("");
+    const [newFlagValue, setNewFlagValue] = useState("");
+
+    const [visiblePackages, setVisiblePackages] = useState({});
+
     const navigate = useNavigate();
     const location = useLocation();
     const { packageName } = location.state || {};
@@ -132,6 +138,39 @@ export default function FlagPage() {
         }
     };
 
+    const handleEditFlag = (index, flag) => {
+        setEditIndex(index);
+        setNewFlagName(flag.flagName);
+        setNewFlagValue(flag.flagValue);
+    };
+
+    const handleSaveEditFlag = async (flg, index) => {
+        const updatedFlag = {
+            flagId: flg._id,
+            flagName: newFlagName,
+            flagValue: newFlagValue,
+        };
+
+        try {
+            await axios.patch(`http://localhost:22000/api/admin/flags/update`, updatedFlag);
+            setFlags((prevFlags) => {
+                const updatedFlags = [...prevFlags];
+                updatedFlags[index] = { ...updatedFlags[index], ...updatedFlag };
+                return updatedFlags;
+            });
+            setEditIndex(null);
+        } catch (err) {
+            setError("Error occurred while updating the flag.");
+        }
+    };
+
+    const handleShowPackages = (index) => {
+        setVisiblePackages((prev) => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
+    };
+
     if (loading) {
         return <div className="loadingContainer">Loading...</div>;
     }
@@ -212,23 +251,63 @@ export default function FlagPage() {
                             </li>
                             {flags.map((flg, index) => (
                                 <li key={index} className="flagListItem">
-                                    <div className="flagName">
-                                        {flg.flagName}
-                                    </div>
-                                    <div className="flagVisibility">
-                                        {flg.flagVisibility === 0 ? "Public" : "Private"}
-                                    </div>
-                                    <div>
-                                        Total Packages Associated: {flg.packagesAssociated.length}
-                                    </div>
-                                    <div className="flagListItemRight">
-                                        <EditIcon htmlColor="DodgerBlue" />
-                                        <DeleteForeverIcon
-                                            onClick={() => handleFlgDelete(flg, index)}
-                                            htmlColor="FireBrick"
-                                        />
-                                        <VisibilityIcon htmlColor="ForestGreen" />
-                                    </div>
+                                    {editIndex === index ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={newFlagName}
+                                                onChange={(e) => setNewFlagName(e.target.value)}
+                                                className="editFlagInput"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={newFlagValue}
+                                                onChange={(e) => setNewFlagValue(e.target.value)}
+                                                className="editFlagInput"
+                                            />
+                                            <button
+                                                onClick={() => handleSaveEditFlag(flg, index)}
+                                                className="saveEditBtn"
+                                            >
+                                                Save
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flagName">
+                                                {flg.flagName}
+                                            </div>
+                                            <div className="flagVisibility">
+                                                {flg.flagVisibility === 0 ? "Public" : "Private"}
+                                            </div>
+                                            <div>
+                                                Total Packages Associated: {flg.packagesAssociated.length}
+                                            </div>
+                                            <div className="flagListItemRight">
+                                                <EditIcon
+                                                    onClick={() => handleEditFlag(index, flg)}
+                                                    htmlColor="DodgerBlue"
+                                                />
+                                                <DeleteForeverIcon
+                                                    onClick={() => handleFlgDelete(flg, index)}
+                                                    htmlColor="FireBrick"
+                                                />
+                                                <VisibilityIcon
+                                                    onClick={() => handleShowPackages(index)}
+                                                    htmlColor="ForestGreen"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+                                    {visiblePackages[index] && (
+                                        <div className="associatedPackages">
+                                            {flg.packagesAssociated.map((pkg, pkgIndex) => (
+                                                <div key={pkgIndex} className="associatedPackageItem">
+                                                    {pkg.packageName}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </li>
                             ))}
                         </ul>
