@@ -24,7 +24,7 @@ export default function FlagPage() {
         async function fetchPackages() {
             try {
                 const response = await axios.get(
-                    "http://localhost:22000/api/admin/package/list"
+                    `${process.env.REACT_APP_API_BASE_URL}/api/admin/package/list`
                 );
                 if (response.data.isError) {
                     setError(response.data.message);
@@ -54,7 +54,7 @@ export default function FlagPage() {
             setLoading(true);
             if (pkgName) {
                 res = await axios.post(
-                    `http://localhost:22000/api/admin/package/listOne`,
+                    `${process.env.REACT_APP_API_BASE_URL}/api/admin/package/listOne`,
                     {
                         packageName: pkgName,
                     }
@@ -67,7 +67,7 @@ export default function FlagPage() {
                 }
             } else {
                 res = await axios.get(
-                    "http://localhost:22000/api/admin/flags/list"
+                    `${process.env.REACT_APP_API_BASE_URL}/api/admin/flags/list`
                 );
                 if (res.data.isError) {
                     setError(res.data.message);
@@ -95,7 +95,7 @@ export default function FlagPage() {
         try {
             if (flag.flagVisibility === 1 || (flag.flagVisibility === 0 && pkgSelected === "")) {
                 await axios.delete(
-                    "http://localhost:22000/api/admin/flags/delete",
+                    `${process.env.REACT_APP_API_BASE_URL}/api/admin/flags/delete`,
                     {
                         data: { flagName: flag.flagName },
                     }
@@ -107,7 +107,7 @@ export default function FlagPage() {
                     packageId: pkgId,
                     removeFlags: [flag._id]
                 };
-                await axios.patch("http://localhost:22000/api/admin/package/update", packageUpdate);
+                await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/admin/package/update`, packageUpdate);
                 setFlags((prevItems) => prevItems.filter((_, i) => i !== index));
             }
             setError(null);

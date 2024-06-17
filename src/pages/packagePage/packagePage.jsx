@@ -33,7 +33,7 @@ export default function PackagePage() {
 
         try {
             const res = await axios.patch(
-                "http://localhost:22000/api/admin/package/update",
+                `${process.env.REACT_APP_API_BASE_URL}/api/admin/package/update`,
                 {
                     packageId: pkg._id,
                     newName: newPkgName,
@@ -62,7 +62,7 @@ export default function PackagePage() {
     const handlePkgDelete = async (pkg, index) => {
         try {
             const res = await axios.delete(
-                "http://localhost:22000/api/admin/package/delete",
+                `${process.env.REACT_APP_API_BASE_URL}/api/admin/package/delete`,
                 {
                     data: { packageName: pkg.packageName },
                 }
@@ -85,7 +85,7 @@ export default function PackagePage() {
             try {
                 setLoading(true);
                 const response = await axios.get(
-                    "http://localhost:22000/api/admin/package/list"
+                    `${process.env.REACT_APP_API_BASE_URL}/api/admin/package/list`
                 );
 
                 if (response.data.isError) {

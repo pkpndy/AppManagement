@@ -28,7 +28,7 @@ export default function AddPackage() {
     useEffect(() => {
         async function fetchFlags() {
             try {
-                const res = await axios.get("http://localhost:22000/api/admin/flags/list");
+                const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/admin/flags/list`);
                 let flagsToShow = res.data.results.filter((flg) => flg.flagVisibility !== 1);
                 setFlags(flagsToShow);
             } catch (err) {
@@ -60,7 +60,7 @@ export default function AddPackage() {
         };
 
         try {
-            const res = await axios.post("http://localhost:22000/api/admin/package/create", newPackage);
+            const res = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/admin/package/create`, newPackage);
             if (res.data.isError) {
                 setError(res.data.message);
                 console.log(res.data.message);
