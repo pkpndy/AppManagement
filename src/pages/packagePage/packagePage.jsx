@@ -25,6 +25,11 @@ export default function PackagePage() {
         setNewPkgName(e.target.value);
     };
 
+    const handleEditPkg = (pkg, index) => {
+        setEditingPackageIndex(index);
+        setNewPkgName(pkg.packageName);
+    }
+
     const handlePkgUpdate = async (pkg, index) => {
         if (newPkgName.trim() === "") {
             setError("Package name cannot be empty");
@@ -142,14 +147,22 @@ export default function PackagePage() {
                             </li>
                             {packages.map((pkg, index) => (
                                 <li className="packageListItem" key={index}>
-                                    <div className="packageListItemLeft">
+                                    <div 
+                                        onClick={() =>
+                                            navigate("/dashboard/flags", {
+                                                state: {
+                                                    packageName: pkg.packageName,
+                                                },
+                                            })
+                                        }
+                                        className="packageListItemLeft">
                                         {editingPackageIndex === index ? (
                                             <div>
                                                 <input
                                                     type="text"
                                                     value={newPkgName}
                                                     onChange={handleNewPkgNameChange}
-                                                    placeholder="Enter new package name..."
+                                                    placeholder={pkg.packageName}
                                                 />
                                                 <button
                                                     onClick={() => handlePkgUpdate(pkg, index)}
@@ -170,7 +183,7 @@ export default function PackagePage() {
                                     </div>
                                     <div className="packageListItemRight">
                                         <EditIcon
-                                            onClick={() => setEditingPackageIndex(index)}
+                                            onClick={() => handleEditPkg(pkg, index)}
                                             htmlColor="DodgerBlue"
                                         />
                                         <DeleteForeverIcon

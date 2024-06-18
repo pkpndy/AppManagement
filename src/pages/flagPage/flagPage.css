@@ -78,7 +78,7 @@
 
 .flagListItem {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     justify-items: center;
     align-items: center;
     background-color: #fff;
@@ -106,6 +106,26 @@
     font-size: 16px;
     font-weight: 500;
 }
+
+.flgEditBtns {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    margin: 2px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.flgEditBtns:hover {
+    background-color: #065fbe;
+}
+
 
 .flagListingActionTab {
     color: purple;

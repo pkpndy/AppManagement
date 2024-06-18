@@ -67,6 +67,7 @@ export default function AddPackage() {
             } else {
                 setPkgName("");
                 setSelectedFlags([]);
+                navigate("/dashboard/packages");
             }
         } catch (err) {
             if (err.response) {

@@ -19,6 +19,7 @@ export default function FlagPage() {
     const [editIndex, setEditIndex] = useState(null);
     const [newFlagName, setNewFlagName] = useState("");
     const [newFlagValue, setNewFlagValue] = useState("");
+    const [newFlagSummary, setNewFlagSummary] = useState("");
 
     const [visiblePackages, setVisiblePackages] = useState({});
 
@@ -142,27 +143,56 @@ export default function FlagPage() {
         setEditIndex(index);
         setNewFlagName(flag.flagName);
         setNewFlagValue(flag.flagValue);
+        setNewFlagSummary(flag.summary);
+    };
+
+    const handleFlagNameChange = (e) => {
+        setNewFlagName(e.target.value);
+    };
+
+    const handleFlagValueChange = (e) => {
+        setNewFlagValue(e.target.value);
+    };
+
+    const handleFlagSummaryChange = (e) => {
+        setNewFlagSummary(e.target.value);
     };
 
     const handleSaveEditFlag = async (flg, index) => {
         const updatedFlag = {
             flagId: flg._id,
-            flagName: newFlagName,
-            flagValue: newFlagValue,
+            newName: newFlagName || flg.flagName,
+            newSummary: newFlagSummary || flg.summary,
+            newValue: newFlagValue || flg.flagValue,
         };
-
+    
         try {
-            await axios.patch(`http://localhost:22000/api/admin/flags/update`, updatedFlag);
+            const res = await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/admin/flags/update`, updatedFlag);
+            if (res.data.isError) {
+                setError(res.data.message);
+                return;
+            }
+            
             setFlags((prevFlags) => {
                 const updatedFlags = [...prevFlags];
-                updatedFlags[index] = { ...updatedFlags[index], ...updatedFlag };
+                updatedFlags[index] = {
+                    ...updatedFlags[index],
+                    flagName: updatedFlag.newName,
+                    flagValue: updatedFlag.newValue,
+                    summary: updatedFlag.newSummary,
+                };
                 return updatedFlags;
             });
+    
             setEditIndex(null);
+            setNewFlagName("");
+            setNewFlagValue("");
+            setNewFlagSummary("");
+            setError(null);
         } catch (err) {
             setError("Error occurred while updating the flag.");
         }
-    };
+    };    
 
     const handleShowPackages = (index) => {
         setVisiblePackages((prev) => ({
@@ -245,7 +275,8 @@ export default function FlagPage() {
                         <ul className="flgsList">
                             <li className="flagListItem">
                                 <div className="flagListingActionTab">Flag Name</div>
-                                <div className="flagListingActionTab">Visibility</div>
+                                <div className="flagListingActionTab">Flag Value</div>
+                                <div className="flagListingActionTab">Summary</div>
                                 <div className="flagListingActionTab">Packages Associated</div>
                                 <div className="flagListingActionTab">Actions</div>
                             </li>
@@ -256,20 +287,29 @@ export default function FlagPage() {
                                             <input
                                                 type="text"
                                                 value={newFlagName}
-                                                onChange={(e) => setNewFlagName(e.target.value)}
+                                                onChange={handleFlagNameChange}
                                                 className="editFlagInput"
+                                                placeholder={flg.flagName}
                                             />
                                             <input
                                                 type="text"
                                                 value={newFlagValue}
-                                                onChange={(e) => setNewFlagValue(e.target.value)}
+                                                onChange={handleFlagValueChange}
                                                 className="editFlagInput"
+                                                placeholder={flg.flagValue}
                                             />
-                                            <button
-                                                onClick={() => handleSaveEditFlag(flg, index)}
-                                                className="saveEditBtn"
-                                            >
+                                            <input 
+                                                type="text" 
+                                                value={newFlagSummary}
+                                                onChange={handleFlagSummaryChange} 
+                                                className="editFlagInput" 
+                                                placeholder={flg.summary}
+                                            />
+                                            <button onClick={() => handleSaveEditFlag(flg, index)} className="flgEditBtns">
                                                 Save
+                                            </button>
+                                            <button onClick={() => setEditIndex(null)} className="flgEditBtns">
+                                                Cancel
                                             </button>
                                         </>
                                     ) : (
@@ -277,11 +317,12 @@ export default function FlagPage() {
                                             <div className="flagName">
                                                 {flg.flagName}
                                             </div>
+                                            <div className="flagVisibility">{flg.flagValue}</div>
                                             <div className="flagVisibility">
-                                                {flg.flagVisibility === 0 ? "Public" : "Private"}
+                                                {flg.summary}
                                             </div>
                                             <div>
-                                                Total Packages Associated: {flg.packagesAssociated.length}
+                                                {flg.packagesAssociated.length}
                                             </div>
                                             <div className="flagListItemRight">
                                                 <EditIcon

@@ -104,6 +104,12 @@
     align-items: center;
 }
 
+.packageListItemLeft:hover {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+}
+
 .editPackageBtns {
     background-color: #007bff;
     color: #fff;
