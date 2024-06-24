@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ErrorPopUp from "../../components/errorPopUp/ErrorPopUp";
 import axios from "axios";
@@ -8,9 +8,12 @@ import "./addPackage.css";
 export default function AddPackage() {
     const navigate = useNavigate();
     const [pkgName, setPkgName] = useState("");
+    const [appName, setAppName] = useState("");
     const [flags, setFlags] = useState([]);
     const [error, setError] = useState(null);
     const [selectedFlags, setSelectedFlags] = useState([]);
+    const [allSelected, setAllSelected] = useState(false);
+    const pkgNameInputRef = useRef(null);
 
     const handleCheckboxChange = (event) => {
         const { name, checked } = event.target;
@@ -23,6 +26,10 @@ export default function AddPackage() {
 
     const handlePackageNameInput = (e) => {
         setPkgName(e.target.value);
+    };
+
+    const handleAppNameInput = (e) => {
+        setAppName(e.target.value);
     };
 
     useEffect(() => {
@@ -56,6 +63,7 @@ export default function AddPackage() {
 
         const newPackage = {
             packageName: pkgName,
+            appName: appName,
             flagsAssociated: selectedFlagsIds
         };
 
@@ -80,6 +88,37 @@ export default function AddPackage() {
         }
     };
 
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Enter') {
+                handleSaveBtnClick();
+            } else if (event.key === 'Escape') {
+                handleBackBtnClick();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [pkgName, selectedFlags]);
+
+    useEffect(() => {
+        if (pkgNameInputRef.current) {
+            pkgNameInputRef.current.focus();
+        }
+    }, []);
+
+    const toggleSelectAll = () => {
+        if (allSelected) {
+            setSelectedFlags([]);
+        } else {
+            setSelectedFlags(flags.map(flg => flg.flagName));
+        }
+        setAllSelected(!allSelected);
+    };
+
     return (
         <div className="addPackage">
             {error && <ErrorPopUp errorMsg={error} />}
@@ -87,20 +126,36 @@ export default function AddPackage() {
                 <div className="addPackageLeft">
                     <span className="packageNameText">Package Name :</span>
                     <input
+                        ref={pkgNameInputRef}
                         type="text"
                         value={pkgName}
                         onChange={handlePackageNameInput}
                         placeholder="Enter package name..."
                         className="packageNameInputArea"
                     />
-                    <div className="packageNameText">Choose Public Flags not to add :</div>
-                    <Table 
-                        selectedFlags={selectedFlags}
-                        setSelectedFlags={setSelectedFlags} 
-                        handleCheckboxChange={handleCheckboxChange} 
-                        Flags={flags} 
-                        className="tableComponent" 
+                    <span className="packageNameText">App Name :</span>
+                    <input
+                        type="text"
+                        value={appName}
+                        onChange={handleAppNameInput}
+                        placeholder="Enter app name..."
+                        className="packageNameInputArea"
                     />
+                    <div className="packageNameText">
+                        Choose Public Flags to add:
+                        <button className="toggleSelectAllBtn" onClick={toggleSelectAll}>
+                            {allSelected ? "Deselect All" : "Select All"}
+                        </button>
+                    </div>
+                    <div className="tableContainer">
+                        <Table 
+                            selectedFlags={selectedFlags}
+                            setSelectedFlags={setSelectedFlags} 
+                            handleCheckboxChange={handleCheckboxChange} 
+                            Flags={flags} 
+                            className="tableComponent" 
+                        />
+                    </div>
                 </div>
                 <div className="addPackageRight">
                     <button onClick={handleBackBtnClick} className="backBtn">Back</button>

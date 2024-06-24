@@ -27,34 +27,9 @@
     margin-bottom: 20px;
 }
 
-.inputDropdown {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-}
-
-.inputDropdown input {
-    padding: 5px;
-    font-size: 1rem;
-}
-
-.inputDropdown button {
-    padding: 5px 10px;
-    font-size: 1rem;
-}
-
 .packageListing {
     font-size: 24px;
     font-weight: 600;
-}
-
-.packageListingActionTab {
-    color: purple;
-    font-size: 18px;
-    font-weight: 500;
-    padding-left: 5px;
-    padding-right: 5px;
-    border-radius: 3px;
 }
 
 .addPackageBtn {
@@ -77,69 +52,69 @@
     flex-direction: column;
 }
 
-.pkgsList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.pkgsTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ensure the table layout is fixed */
 }
 
-.packageListItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #fff;
-    border-radius: 5px;
-    padding: 15px 20px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s;
+.pkgsTable th,
+.pkgsTable td {
+    padding: 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+    word-break: break-all; /* Ensure long words break */
+    white-space: normal; /* Ensure text wraps */
+    overflow-wrap: break-word; /* Ensure long words wrap */
 }
 
-.packageListItem:hover {
-    background-color: #f0f0f0;
+.pkgsTable th {
+    background-color: #f2f2f2;
+    font-weight: 600;
 }
 
-.packageListItemLeft {
-    display: flex;
-    align-items: center;
-}
-
-.packageListItemLeft:hover {
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-}
-
-.editPackageBtns {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    margin-left: 5px;
-    padding: 5px 10px;
-    transition: background-color 0.3s;
-}
-
-.editPackageBtns:hover {
-    background-color: #0056b3;
-}
-
-.packageName {
-    font-size: 18px;
-    font-weight: 500;
-}
-
-.packageListItemRight {
+.pkgListItemRight {
     display: flex;
     gap: 15px;
+    justify-content: center;
 }
 
-.packageListItemRight .MuiSvgIcon-root {
+.pkgListItemRight .MuiSvgIcon-root {
     cursor: pointer;
     transition: transform 0.3s;
 }
 
-.packageListItemRight .MuiSvgIcon-root:hover {
+.pkgListItemRight .MuiSvgIcon-root:hover {
     transform: scale(1.2);
+}
+
+.pkgSaveBtns, .pkgCancelBtns {
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+    margin: 2px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.pkgCancelBtns {
+    background-color: #007bff;
+}
+
+.editPkgTextarea {
+    width: 100%;
+    min-height: 40px; /* Minimum height */
+    resize: none; /* Disable manual resizing */
+    overflow: hidden; /* Hide overflow */
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
 }

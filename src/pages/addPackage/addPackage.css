@@ -1,3 +1,18 @@
+.toggleSelectAllBtn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.toggleSelectAllBtn:hover {
+    background-color: #0056b3;
+}
+
 .addPackage {
     display: flex;
     justify-content: center;
@@ -36,8 +51,19 @@
     width: calc(100% - 300px); /* Adjusted to occupy more width */
 }
 
+.tableContainer {
+    max-height: 400px; /* Adjust this height as needed */
+    overflow-y: auto;
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
 .addPackageLeft {
     flex: 8;
+    max-width: 70%; /* Ensure it has a max width */
+    min-width: 50%; /* Ensure it has a min width */
 }
 
 .addPackageRight {

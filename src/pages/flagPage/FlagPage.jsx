@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import AlertPopUp from "../../components/alertPopUp/AlertPopUp";
@@ -26,6 +26,10 @@ export default function FlagPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const { packageName } = location.state || {};
+
+    const flagNameRef = useRef(null);
+    const flagValueRef = useRef(null);
+    const flagSummaryRef = useRef(null);
 
     useEffect(() => {
         async function fetchPackages() {
@@ -55,6 +59,18 @@ export default function FlagPage() {
         }
     }, [packageName]);
 
+    const sortFlags = (flagsToSort) => {
+        return flagsToSort.sort((a, b) => {
+            if (a.flagName.toLowerCase() < b.flagName.toLowerCase()) {
+                return -1;
+            }
+            if (a.flagName.toLowerCase() > b.flagName.toLowerCase()) {
+                return 1;
+            }
+            return 0;
+        });
+    };
+
     const fetchFlags = async (pkgName = "") => {
         let res;
         try {
@@ -70,7 +86,7 @@ export default function FlagPage() {
                     setError(res.data.message);
                     setFlags([]);
                 } else {
-                    setFlags(res.data.results.flagsAssociated);
+                    setFlags(sortFlags(res.data.results.flagsAssociated));
                 }
             } else {
                 res = await axios.get(
@@ -81,7 +97,7 @@ export default function FlagPage() {
                     setFlags([]);
                 } else {
                     let flagsToShow = res.data.results.filter((flg) => flg.flagVisibility !== 1);
-                    setFlags(flagsToShow);
+                    setFlags(sortFlags(flagsToShow));
                 }
             }
             setError(null);
@@ -99,22 +115,15 @@ export default function FlagPage() {
 
     const handleConfirmDelete = async () => {
         const { flag, index } = deleteConfirmation;
+        console.log("flag Delte request", flag, index);
         try {
             if (flag.flagVisibility === 1 || (flag.flagVisibility === 0 && pkgSelected === "")) {
                 await axios.delete(
                     `${process.env.REACT_APP_API_BASE_URL}/api/admin/flags/delete`,
                     {
-                        data: { flagName: flag.flagName },
+                        data: { flagId: flag._id },
                     }
                 );
-                setFlags((prevItems) => prevItems.filter((_, i) => i !== index));
-            } else if (pkgSelected !== "") {
-                const pkgId = packages.find((pkg) => pkg.packageName === pkgSelected)._id;
-                const packageUpdate = {
-                    packageId: pkgId,
-                    removeFlags: [flag._id]
-                };
-                await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/admin/package/update`, packageUpdate);
                 setFlags((prevItems) => prevItems.filter((_, i) => i !== index));
             }
             setError(null);
@@ -144,6 +153,22 @@ export default function FlagPage() {
         setNewFlagName(flag.flagName);
         setNewFlagValue(flag.flagValue);
         setNewFlagSummary(flag.summary);
+
+        setTimeout(() => {
+            if (flagNameRef.current) {
+                flagNameRef.current.style.height = 'auto';
+                flagNameRef.current.style.height = flagNameRef.current.scrollHeight + 'px';
+                flagNameRef.current.focus();
+            }
+            if (flagValueRef.current) {
+                flagValueRef.current.style.height = 'auto';
+                flagValueRef.current.style.height = flagValueRef.current.scrollHeight + 'px';
+            }
+            if (flagSummaryRef.current) {
+                flagSummaryRef.current.style.height = 'auto';
+                flagSummaryRef.current.style.height = flagSummaryRef.current.scrollHeight + 'px';
+            }
+        }, 100); // Add a small delay to ensure the ref is set
     };
 
     const handleFlagNameChange = (e) => {
@@ -165,14 +190,14 @@ export default function FlagPage() {
             newSummary: newFlagSummary || flg.summary,
             newValue: newFlagValue || flg.flagValue,
         };
-    
+
         try {
             const res = await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/admin/flags/update`, updatedFlag);
             if (res.data.isError) {
                 setError(res.data.message);
                 return;
             }
-            
+
             setFlags((prevFlags) => {
                 const updatedFlags = [...prevFlags];
                 updatedFlags[index] = {
@@ -183,7 +208,7 @@ export default function FlagPage() {
                 };
                 return updatedFlags;
             });
-    
+
             setEditIndex(null);
             setNewFlagName("");
             setNewFlagValue("");
@@ -192,13 +217,45 @@ export default function FlagPage() {
         } catch (err) {
             setError("Error occurred while updating the flag.");
         }
-    };    
+    };
 
     const handleShowPackages = (index) => {
         setVisiblePackages((prev) => ({
             ...prev,
             [index]: !prev[index]
         }));
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (editIndex !== null) {
+                if (event.key === 'Enter') {
+                    handleSaveEditFlag(flags[editIndex], editIndex);
+                } else if (event.key === 'Escape') {
+                    setEditIndex(null);
+                } else if (event.key === 'Tab') {
+                    event.preventDefault();
+                    if (document.activeElement === flagNameRef.current) {
+                        if (flagValueRef.current) flagValueRef.current.focus();
+                    } else if (document.activeElement === flagValueRef.current) {
+                        if (flagSummaryRef.current) flagSummaryRef.current.focus();
+                    } else if (document.activeElement === flagSummaryRef.current) {
+                        if (flagNameRef.current) flagNameRef.current.focus();
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [editIndex, newFlagName, newFlagValue, newFlagSummary, flags]);
+
+    const autoResizeTextarea = (event) => {
+        event.target.style.height = 'auto';
+        event.target.style.height = event.target.scrollHeight + 'px';
     };
 
     if (loading) {
@@ -272,86 +329,102 @@ export default function FlagPage() {
                         </button>
                     </div>
                     <div className="flgsBottom">
-                        <ul className="flgsList">
-                            <li className="flagListItem">
-                                <div className="flagListingActionTab">Flag Name</div>
-                                <div className="flagListingActionTab">Flag Value</div>
-                                <div className="flagListingActionTab">Summary</div>
-                                <div className="flagListingActionTab">Packages Associated</div>
-                                <div className="flagListingActionTab">Actions</div>
-                            </li>
-                            {flags.map((flg, index) => (
-                                <li key={index} className="flagListItem">
-                                    {editIndex === index ? (
-                                        <>
-                                            <input
-                                                type="text"
-                                                value={newFlagName}
-                                                onChange={handleFlagNameChange}
-                                                className="editFlagInput"
-                                                placeholder={flg.flagName}
-                                            />
-                                            <input
-                                                type="text"
-                                                value={newFlagValue}
-                                                onChange={handleFlagValueChange}
-                                                className="editFlagInput"
-                                                placeholder={flg.flagValue}
-                                            />
-                                            <input 
-                                                type="text" 
-                                                value={newFlagSummary}
-                                                onChange={handleFlagSummaryChange} 
-                                                className="editFlagInput" 
-                                                placeholder={flg.summary}
-                                            />
-                                            <button onClick={() => handleSaveEditFlag(flg, index)} className="flgEditBtns">
-                                                Save
-                                            </button>
-                                            <button onClick={() => setEditIndex(null)} className="flgEditBtns">
-                                                Cancel
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="flagName">
-                                                {flg.flagName}
-                                            </div>
-                                            <div className="flagVisibility">{flg.flagValue}</div>
-                                            <div className="flagVisibility">
-                                                {flg.summary}
-                                            </div>
-                                            <div>
-                                                {flg.packagesAssociated.length}
-                                            </div>
-                                            <div className="flagListItemRight">
-                                                <EditIcon
-                                                    onClick={() => handleEditFlag(index, flg)}
-                                                    htmlColor="DodgerBlue"
-                                                />
-                                                <DeleteForeverIcon
-                                                    onClick={() => handleFlgDelete(flg, index)}
-                                                    htmlColor="FireBrick"
-                                                />
-                                                <VisibilityIcon
-                                                    onClick={() => handleShowPackages(index)}
-                                                    htmlColor="ForestGreen"
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-                                    {visiblePackages[index] && (
-                                        <div className="associatedPackages">
-                                            {flg.packagesAssociated.map((pkg, pkgIndex) => (
-                                                <div key={pkgIndex} className="associatedPackageItem">
-                                                    {pkg.packageName}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
+                        <table className="flgsTable">
+                            <thead>
+                                <tr>
+                                    <th>Flag Name</th>
+                                    <th>Flag Value</th>
+                                    <th>Summary</th>
+                                    <th>Packages Associated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {flags.map((flg, index) => (
+                                    <React.Fragment key={index}>
+                                        <tr>
+                                            {editIndex === index ? (
+                                                <>
+                                                    <td>
+                                                        <textarea
+                                                            ref={flagNameRef}
+                                                            value={newFlagName}
+                                                            onChange={handleFlagNameChange}
+                                                            className="editFlagTextarea"
+                                                            placeholder={flg.flagName}
+                                                            onInput={autoResizeTextarea}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <textarea
+                                                            ref={flagValueRef}
+                                                            value={newFlagValue}
+                                                            onChange={handleFlagValueChange}
+                                                            className="editFlagTextarea"
+                                                            placeholder={flg.flagValue}
+                                                            onInput={autoResizeTextarea}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <textarea
+                                                            ref={flagSummaryRef}
+                                                            value={newFlagSummary}
+                                                            onChange={handleFlagSummaryChange}
+                                                            className="editFlagTextarea"
+                                                            placeholder={flg.summary}
+                                                            onInput={autoResizeTextarea}
+                                                        />
+                                                    </td>
+                                                    <td>{flg.packagesAssociated.length}</td>
+                                                    <td>
+                                                        <button onClick={() => handleSaveEditFlag(flg, index)} className="flgSaveBtns">
+                                                            Save
+                                                        </button>
+                                                        <button onClick={() => setEditIndex(null)} className="flgCancelBtns">
+                                                            Cancel
+                                                        </button>
+                                                    </td>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <td>{flg.flagName}</td>
+                                                    <td style={{ textAlign: 'center' }}>{flg.flagValue}</td>
+                                                    <td>{flg.summary}</td>
+                                                    <td>{flg.packagesAssociated.length}</td>
+                                                    <td className="flagListItemRight">
+                                                        <EditIcon
+                                                            onClick={() => handleEditFlag(index, flg)}
+                                                            htmlColor="DodgerBlue"
+                                                        />
+                                                        <DeleteForeverIcon
+                                                            onClick={() => handleFlgDelete(flg, index)}
+                                                            htmlColor="FireBrick"
+                                                        />
+                                                        <VisibilityIcon
+                                                            onClick={() => handleShowPackages(index)}
+                                                            htmlColor="ForestGreen"
+                                                        />
+                                                    </td>
+                                                </>
+                                            )}
+                                        </tr>
+                                        {visiblePackages[index] && (
+                                            <tr>
+                                                <td colSpan="5">
+                                                    <div className="associatedPackages">
+                                                        {flg.packagesAssociated.map((pkg, pkgIndex) => (
+                                                            <div key={pkgIndex} className="associatedPackageItem">
+                                                                {pkg.packageName}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}

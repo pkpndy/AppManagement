@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MultiSelectDropdown from "../../components/multiSelectDropdown/MultiSelectDropdown";
 import AlertPopUp from "../../components/alertPopUp/AlertPopUp";
@@ -16,7 +16,10 @@ export default function AddFlag() {
     const [flgSummary, setFlgSummary] = useState("");
     const [flgValue, setFlgValue] = useState("");
     const [error, setError] = useState(null);
-    const [showConfirmation, setShowConfirmation] = useState(false);
+
+    const flgNameInputRef = useRef(null);
+    const flgSummaryInputRef = useRef(null);
+    const flgValueInputRef = useRef(null);
 
     useEffect(() => {
         async function fetchPackages() {
@@ -34,6 +37,28 @@ export default function AddFlag() {
         fetchPackages();
     }, []);
 
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Enter') {
+                handleSaveBtnClick();
+            } else if (event.key === 'Escape') {
+                handleBackBtnClick();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [flgName, flgSummary, flgValue, selectedOptions]);
+
+    useEffect(() => {
+        if (flgNameInputRef.current) {
+            flgNameInputRef.current.focus();
+        }
+    }, []);
+
     const handleCheckboxChange = (event) => {
         const { value, checked } = event.target;
         setSelectedOptions((prevSelectedOptions) =>
@@ -48,15 +73,19 @@ export default function AddFlag() {
     };
 
     const handleBackBtnClick = () => {
-        navigate("/dashboard/flags");
-    }
+        navigate("/dashboard/flags", {
+            state: {
+                packageName: packageName,
+            },
+        });
+    };
 
     const handleSaveBtnClick = () => {
         if (!flgName.trim() || !flgSummary.trim() || !flgValue.trim()) {
             setError("Flag name, flag summary, or flag value cannot be empty!");
             return;
         }
-        setShowConfirmation(true);
+        handleConfirmSave();
     };
 
     const handleConfirmSave = async () => {
@@ -76,6 +105,8 @@ export default function AddFlag() {
         };
 
         try {
+            console.log("newFlag");
+            console.log(newFlag);
             const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/admin/flags/create`, newFlag);
             if (response.data.isError) {
                 setError(response.data.message);
@@ -85,17 +116,22 @@ export default function AddFlag() {
                 setFlgValue("");
                 setSelectedOptions([]);
                 setError(null);
-                navigate("/dashboard/flags");
+                navigate("/dashboard/flags", {
+                    state: {
+                        packageName: packageName,
+                    },
+                });
             }
         } catch (err) {
             setError("Error occurred while adding flag.");
-        } finally {
-            setShowConfirmation(false);
         }
     };
 
-    const handleCancelSave = () => {
-        setShowConfirmation(false);
+    const handleKeyDown = (event, nextRef) => {
+        if (event.key === 'Tab' && nextRef && nextRef.current) {
+            event.preventDefault();
+            nextRef.current.focus();
+        }
     };
 
     return (
@@ -104,25 +140,31 @@ export default function AddFlag() {
                 <div className="addPackageLeft">
                     <span className="flagFieldName">Flag Name :</span>
                     <input
+                        ref={flgNameInputRef}
                         type="text"
                         value={flgName}
                         onChange={handleInputChange(setFlgName)}
+                        onKeyDown={(e) => handleKeyDown(e, flgSummaryInputRef)}
                         placeholder="Enter Flag name..."
                         className="flagFieldInputArea"
                     />
                     <span className="flagFieldName">Flag Summary :</span>
                     <input
+                        ref={flgSummaryInputRef}
                         type="text"
                         value={flgSummary}
                         onChange={handleInputChange(setFlgSummary)}
+                        onKeyDown={(e) => handleKeyDown(e, flgValueInputRef)}
                         placeholder="Enter flag summary..."
                         className="flagFieldInputArea"
                     />
                     <span className="flagFieldName">Flag Value :</span>
                     <input
+                        ref={flgValueInputRef}
                         type="text"
                         value={flgValue}
                         onChange={handleInputChange(setFlgValue)}
+                        onKeyDown={(e) => handleKeyDown(e, flgNameInputRef)} // Loop back to the first input
                         placeholder="Enter flag value"
                         className="flagFieldInputArea"
                     />
@@ -154,13 +196,6 @@ export default function AddFlag() {
                     {error && <ErrorPopUp errorMsg={error} />}
                 </div>
             </div>
-            {showConfirmation && 
-                <AlertPopUp 
-                    popupText="Are you sure you want to save this flag?" 
-                    onConfirm={handleConfirmSave} 
-                    onCancel={handleCancelSave} 
-                />
-            }
         </div>
     );
 }

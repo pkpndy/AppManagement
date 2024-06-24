@@ -3,9 +3,17 @@ import "./multiSelectDropdown.css";
 
 export default function MultiSelectDropdown({ headerText, selectedOptions, packages, handleCheckboxChange }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    
+
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedOptions.length === packages.length) {
+            packages.forEach(pkg => handleCheckboxChange({ target: { value: pkg.packageName, checked: false } }));
+        } else {
+            packages.forEach(pkg => handleCheckboxChange({ target: { value: pkg.packageName, checked: true } }));
+        }
     };
 
     return (
@@ -16,6 +24,9 @@ export default function MultiSelectDropdown({ headerText, selectedOptions, packa
             </div>
             {dropdownOpen && (
                 <div className="dropdownMenu">
+                    <div className="selectAllBtn" onClick={toggleSelectAll}>
+                        {selectedOptions.length === packages.length ? "Deselect All" : "Select All"}
+                    </div>
                     {packages.map((pkg) => (
                         <label key={pkg._id} className="checkboxLabel">
                             <input

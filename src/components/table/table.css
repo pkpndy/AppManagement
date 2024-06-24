@@ -1,42 +1,56 @@
 .table {
     width: 100%;
-    border-collapse: collapse;
 }
 
 .tableContainer {
-    border: 1px solid #ddd;
-    padding: 0;
+    overflow-x: auto; /* Ensure the container can scroll horizontally if needed */
 }
 
 .tableList {
-    list-style-type: none;  /* Remove bullet points */
+    list-style: none;
     padding: 0;
     margin: 0;
+    width: 100%; /* Ensure the table takes full width of its container */
 }
 
 .tableListItem {
     display: flex;
-    justify-content: space-between; /* Ensure items are spaced evenly */
+    justify-content: space-between;
     align-items: center;
-    padding: 8px;
-    border-bottom: 1px solid #ddd; /* Line between rows */
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer; /* Add cursor pointer to indicate clickable rows */
 }
 
-.tableListItem > div {
-    flex: 1; /* Ensure equal width for each item */
-    text-align: center; /* Center the content */
-    border-right: 1px solid #ddd; /* Line between columns */
+.tableListItem.header {
+    font-weight: bold;
+    background-color: #f2f2f2;
 }
 
-.tableListItem > div:last-child {
-    border-right: none; /* Remove border from the last item */
+.tableListItem div {
+    flex: 1;
+    text-align: center;
+    padding: 5px 10px;
+    word-wrap: break-word; /* Ensure long words break */
+    white-space: pre-wrap; /* Ensure text wraps */
+}
+
+.tableListItem.selected {
+    background-color: #e0f7fa; /* Highlight selected row */
 }
 
 .tableListItem input[type="checkbox"] {
-    margin-right: 10px;
+    cursor: pointer;
 }
 
-/* Optional: Add hover effect */
-.tableListItem:hover {
-    background-color: #f1f1f1;
+.editFlagTextarea {
+    width: 100%;
+    min-height: 40px; /* Minimum height */
+    resize: none; /* Disable manual resizing */
+    overflow: hidden; /* Hide overflow */
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
 }
